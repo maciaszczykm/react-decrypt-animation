@@ -101,10 +101,15 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Decrypt = function (_React$Component) {
   _inherits(Decrypt, _React$Component);
 
-  function Decrypt() {
+  function Decrypt(props) {
     _classCallCheck(this, Decrypt);
 
-    return _possibleConstructorReturn(this, (Decrypt.__proto__ || Object.getPrototypeOf(Decrypt)).apply(this, arguments));
+    var _this = _possibleConstructorReturn(this, (Decrypt.__proto__ || Object.getPrototypeOf(Decrypt)).call(this, props));
+
+    _this.state = {
+      text: props.text
+    };
+    return _this;
   }
 
   _createClass(Decrypt, [{
@@ -113,7 +118,7 @@ var Decrypt = function (_React$Component) {
       return _react2.default.createElement(
         'div',
         null,
-        'Let\'s Decrypt!'
+        this.state.text
       );
     }
   }]);
