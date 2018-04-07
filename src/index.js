@@ -1,11 +1,76 @@
 import React from 'react';
 
+const dictionary = "0123456789qwertyuiopasdfghjklzxcvbnm!?></\a`~+*=@#$%".split('');
+
 class Decrypt extends React.Component {
   constructor(props) {
     super(props);
+    this.target = props.text || "unknown text";
+    this.delay = props.delay || 3000;
+    this.interval = props.interval || 30;
     this.state = {
-      text: props.text,
+      text: this.init(props.text),
     };
+  }
+
+  init(text) {
+    return text && text.length > 3 ? `${text[0]}${text.length - 2}${text[text.length - 1]}` : text;
+  }
+
+  componentDidMount() {
+    setTimeout(() => {
+      let timePassed = 0;
+      let lettersCount = this.state.text.length;
+      let interval = setInterval(() => {
+        timePassed += this.interval;
+
+        // Add new letters 5 times slower.
+        if(this.state.text.length < this.target.length &&
+          timePassed > (this.target.length * this.interval * 5)) {
+          lettersCount++;
+          this.setStateText(`${this.target[0]}${this.randomString(lettersCount - 2)}${this.target[this.target.length - 1]}`);
+        }
+
+        // Try to find matching letters.
+        if(lettersCount === this.target.length) {
+          for(let i = 1; i < lettersCount - 1; i++) {
+            if(this.state.text[i] != this.target[i]) {
+              this.setStateText(this.setCharAt(this.state.text, i, dictionary[this.random()]))
+            }
+          }
+        }
+
+        // Finish when text is matching target.
+        if(this.target === this.state.text) {
+          clearInterval(interval);
+        }
+      }, this.interval);
+    }, this.delay);
+  }
+
+  random() {
+    return Math.floor(Math.random() * dictionary.length);
+  }
+
+  randomString(amount) {
+    let s = '';
+    for(var i = 0; i < amount; i++) {
+      s += dictionary[this.random()];
+    }
+    return s;
+  }
+
+  setCharAt(str,index,chr) {
+    if(index > str.length - 1) {
+      return str;
+    }
+    return str.substr(0,index) + chr + str.substr(index+1);
+  }
+
+  setStateText(text) {
+    this.setState({
+      text: text,
+    })
   }
 
   render() {
@@ -16,79 +81,3 @@ class Decrypt extends React.Component {
 }
 
 export default Decrypt;
-
-// export class AppComponent implements OnInit, OnDestroy {
-//   delay = 1000;
-//   interval = 30;
-//   dictionary = "0123456789qwertyuiopasdfghjklzxcvbnm!?></\a`~+*=@#$%".split('');
-//
-//   nine = '9';
-//   target = "aciaszczy";
-//
-//   public timerSubscription;
-//   public xs;
-//   constructor() {}
-//
-//   decrypt() {
-//     let rand = '';
-//     let timeBeforeNextLetter = 100;
-//     let timePassed = 0;
-//     let letters = this.nine.length;
-//     let i = 0;
-//
-//     this.xs = Observable.timer(0, this.interval)
-//         .subscribe(() => {
-//           timePassed += this.interval;
-//
-//           if(this.nine.length < this.target.length && timePassed > (this.nine.length * timeBeforeNextLetter)) {
-//             letters++;
-//             this.nine = this.ranString(letters);
-//           }
-//
-//           if(letters === this.target.length) {
-//             for(i = 0; i < letters; i++) {
-//               if(this.nine[i] != this.target[i]) {
-//                 this.nine = this.setCharAt(this.nine, i, this.dictionary[this.ran()]);
-//               }
-//             }
-//           }
-//
-//           if (this.nine === this.target) {
-//             return this.xs.unsubscribe();
-//           }
-//         });
-//
-//   }
-//
-//    setCharAt(str,index,chr) {
-//     if(index > str.length-1) return str;
-//     return str.substr(0,index) + chr + str.substr(index+1);
-// }
-//
-//   ran() {
-//    return Math.floor(Math.random() * this.dictionary.length)
-//   }
-//
-//   ranString(amt) {
-//     let s = '';
-//     for(var i = 0; i < amt; i++) {
-//       s += this.dictionary[this.ran()];
-//     }
-//     return s;
-//   }
-//
-//       ngOnInit() {
-//           this.timerSubscription = Observable.timer(0, this.interval)
-//               .subscribe(() => {
-//                   this.delay -= this.interval;
-//                   if (this.delay <= 0) {
-//                       this.decrypt();
-//                       return this.timerSubscription.unsubscribe();
-//                   }
-//               });
-//       }
-//
-//       ngOnDestroy() {
-//           if (this.timerSubscription) { this.timerSubscription.unsubscribe(); }
-//       }
-// }

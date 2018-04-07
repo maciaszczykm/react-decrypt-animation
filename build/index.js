@@ -98,6 +98,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var dictionary = "0123456789qwertyuiopasdfghjklzxcvbnm!?></\a`~+*=@#$%".split('');
+
 var Decrypt = function (_React$Component) {
   _inherits(Decrypt, _React$Component);
 
@@ -106,13 +108,83 @@ var Decrypt = function (_React$Component) {
 
     var _this = _possibleConstructorReturn(this, (Decrypt.__proto__ || Object.getPrototypeOf(Decrypt)).call(this, props));
 
+    _this.target = props.text || "unknown text";
+    _this.delay = props.delay || 3000;
+    _this.interval = props.interval || 30;
     _this.state = {
-      text: props.text
+      text: _this.init(props.text)
     };
     return _this;
   }
 
   _createClass(Decrypt, [{
+    key: 'init',
+    value: function init(text) {
+      return text && text.length > 3 ? '' + text[0] + (text.length - 2) + text[text.length - 1] : text;
+    }
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      var _this2 = this;
+
+      setTimeout(function () {
+        var timePassed = 0;
+        var lettersCount = _this2.state.text.length;
+        var interval = setInterval(function () {
+          timePassed += _this2.interval;
+
+          // Add new letters 5 times slower.
+          if (_this2.state.text.length < _this2.target.length && timePassed > _this2.target.length * _this2.interval * 5) {
+            lettersCount++;
+            _this2.setStateText('' + _this2.target[0] + _this2.randomString(lettersCount - 2) + _this2.target[_this2.target.length - 1]);
+          }
+
+          // Try to find matching letters.
+          if (lettersCount === _this2.target.length) {
+            for (var i = 1; i < lettersCount - 1; i++) {
+              if (_this2.state.text[i] != _this2.target[i]) {
+                _this2.setStateText(_this2.setCharAt(_this2.state.text, i, dictionary[_this2.random()]));
+              }
+            }
+          }
+
+          // Finish when text is matching target.
+          if (_this2.target === _this2.state.text) {
+            clearInterval(interval);
+          }
+        }, _this2.interval);
+      }, this.delay);
+    }
+  }, {
+    key: 'random',
+    value: function random() {
+      return Math.floor(Math.random() * dictionary.length);
+    }
+  }, {
+    key: 'randomString',
+    value: function randomString(amount) {
+      var s = '';
+      for (var i = 0; i < amount; i++) {
+        s += dictionary[this.random()];
+      }
+      return s;
+    }
+  }, {
+    key: 'setCharAt',
+    value: function setCharAt(str, index, chr) {
+      if (index > str.length - 1) {
+        return str;
+      }
+      return str.substr(0, index) + chr + str.substr(index + 1);
+    }
+  }, {
+    key: 'setStateText',
+    value: function setStateText(text) {
+      this.setState({
+        text: text
+      });
+    }
+  }, {
     key: 'render',
     value: function render() {
       return _react2.default.createElement(

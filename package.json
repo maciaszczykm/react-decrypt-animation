@@ -1,6 +1,6 @@
 {
   "name": "react-decrypt-animation",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Animated decryption component for React",
   "main": "build/index.js",
   "peerDependencies": {
